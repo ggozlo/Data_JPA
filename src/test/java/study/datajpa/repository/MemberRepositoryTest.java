@@ -248,4 +248,30 @@ class MemberRepositoryTest {
         }
     }
 
+    @Test
+    public void queryHint() {
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
+
+        Member findMember = memberRepository.findReadByUsername(member1.getUsername());
+        findMember.setUsername("member2");
+
+        entityManager.flush(); // update 쿼리 발생
+    }
+
+    @Test
+    public void lock() {
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Member> findMember = memberRepository.findLockByUsername(member1.getUsername());
+
+        for (Member member : findMember) {
+            System.out.println("member = " + member);
+        }
+    }
 }
