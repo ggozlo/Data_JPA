@@ -15,6 +15,12 @@ spring:
 #        dialect: org.hibernate.dialect.Oracle10gDialect
         #show_sql: true
         format_sql : true
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 2000
+  #      one-indexed-parameters: true 한계가 있다 겉 보기만 1시작이지 실제 pageable 내용은 0부터 시작이다
 
 logging:
   level:
