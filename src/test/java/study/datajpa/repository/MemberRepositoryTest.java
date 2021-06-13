@@ -274,4 +274,24 @@ class MemberRepositoryTest {
             System.out.println("member = " + member);
         }
     }
+
+    @Test
+    public void callCustom() {
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        List<Member> result = memberRepository.findMemberCustom();
+        // 커스텀 JpaRepository - 다른 JDBC 라이브러리를 사용할 인터페이스를 생성, 해당 인터페이스의 구현체를 생성 하여
+        // 용도에 맞게 구현, 인터페이스를 JpaRepository를 사용하는 인터페이스에 확장시키면 Data Jpa에서 구현체에서 기능을 끌어와서
+        // Jpa Repoistory 에서 사용 가능 이름 법칙은 Data Jpa 인터페이스 명 + Impl
+        // 확장용 커스텀 인터페이스명 + Impl 로도 가능, 복수의 인터페이스 확장
+        // 설정으로 Impl 은 바꿀수 있음
+
+       for (Member member : result) {
+            System.out.println("member = " + member);
+        }
+    }
 }
