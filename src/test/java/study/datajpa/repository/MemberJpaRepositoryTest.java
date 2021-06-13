@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.Team;
 
 import javax.persistence.EntityManager;
 
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemberJpaRepositoryTest {
 
     @Autowired MemberJpaRepository memberJpaRepository;
+
 
     @Test
     public void testMember() {
@@ -81,5 +83,6 @@ class MemberJpaRepositoryTest {
         List<Member> result = memberJpaRepository.nameQuery(member1.getUsername());
         assertThat(result.get(0)).isEqualTo(member1);
     }
+
 
 }
