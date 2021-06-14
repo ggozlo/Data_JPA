@@ -5,9 +5,8 @@ import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -294,4 +293,74 @@ class MemberRepositoryTest {
             System.out.println("member = " + member);
         }
     }
+
+    @Test // 명세
+    public void specBasic() {
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+        entityManager.flush();
+        entityManager.clear();
+
+        Specification<Member> spec = MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+        // criteria - 복잡하다!
+        memberRepository.findAll(); // spec이 안들어가...
+
+    }
+
+    @Test // QueryByExample
+    public void queryByExample() {
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Probe
+        Member member = new Member("m1"); // 검색 조건용 엔티티
+        Team team = new Team("teamA");
+        member.setTeam(team); // 연관관계도 있다면 검색에 포함해줌 하지만 inner 조인만 되고 outer 조인은 안댐
+
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("age");
+        // 무시 조건 설정, premitive 타입은 null이 안되서 0으로 조건에 들어가서 무시 해줘야함
+
+        Example<Member> example = Example.of(member, matcher); // 검색에 들어갈 Example 인스턴스
+        List<Member> result = memberRepository.findAll(example); // 인스턴스로 검색
+
+        assertThat(result.get(0).getUsername()).isEqualTo("m1");
+
+        // 쿼리 dsl이 낫다다
+    }
+
+    @Test
+    public void projections() {
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        entityManager.persist(m1);
+        entityManager.persist(m2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<NestedClosedProjections> result = memberRepository.findProjectionsByUsername("m1", NestedClosedProjections.class);
+
+        for (NestedClosedProjections usernameOnlyDto : result) {
+            System.out.println("usernameOnlyDto = " + usernameOnlyDto.getUsername());
+            System.out.println("usernameOnlyDto.getTeam().getName() = " + usernameOnlyDto.getTeam().getName());
+        }
+    }
+
+
 }
