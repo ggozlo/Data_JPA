@@ -70,9 +70,19 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true") ) // 일기전용으로 작동함
     Member findReadByUsername(String username);
 
-    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
+    @Lock(value = LockModeType.PESSIMISTIC_WRITE) // 트랜잭션 락 기능
     List<Member> findLockByUsername(String username);
 
     <T> List<T> findProjectionsByUsername( String username, Class<T> type);
     // 프로젝션을 반환 타입에 그대로 입력, 동적으로 제네릭 응용 가능
+
+    @Query(nativeQuery = true, value = " select * from Member where username=?")
+        // 네이티브 쿼리, 한계가 있음 반환타입이 애매함 그냥 커스텀 repository로 추천, Sort 파라미터 잘 안됨
+        // JPQL 처럼 로딩시점 문법 확인 안됨, 동적쿼리 안댐
+    Member findByNativeQuery(String username);
+
+    @Query(value = "select m.member_id as id, m.username, t.name as teamname from member m left join team t", // as로 프로젝션의 변수명 또는 메서드명 조건에 일치시키면 알아서 들어간다
+        countQuery = "select count(*) from member",
+        nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable); // 프로젝션 사용시 네이티브 쿼리지만 페이징 가능 하지만 한계는 있음 동적쿼리는 안댐
 }

@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Getter @Setter
@@ -47,6 +48,10 @@ public class Member extends BaseEntity {
         team.getMembers().add(this);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getUsername(), getAge(), getTeam());
+    }
 
     public Member(String username) {
         this.username = username;
